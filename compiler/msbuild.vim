@@ -1,7 +1,7 @@
 " Vim compiler file
 " Compiler:	Microsoft MSBuild Runner
 " Maintainer:	Kian Ryan (kian@orangetentacle.co.uk)
-" Last Change:	2012 Sep 22
+" Last Change:	2018 Apr 20
 
 "if !has("win32")
   "finish
@@ -28,7 +28,13 @@ else
     let s:build_file = cs#find_net_solution_file()
 endif
 
-execute 'CompilerSet makeprg=' . cs#get_net_compiler("msbuild") . "\\ " 
+if exists("g:net_compiler")
+    let s:compiler = g:net_compiler
+else
+    let s:compiler = cs#get_net_compiler("msbuild")
+endif
+
+execute 'CompilerSet makeprg=' . s:compiler . "\\ " 
             \ . "/nologo\\ /clp:Verbosity=quiet\\ /property:GenerateFullPaths=true\\ "
             \ . s:build_file
 
