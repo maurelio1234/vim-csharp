@@ -56,7 +56,40 @@ function! cs#get_net_compiler(compiler)
 endfunction
 
 function! cs#find_net_solution_file()
-    " Just consider first match
-    return get(split(globpath(".", "*.sln"), "\n"), 0, "")
+    let current_dir = expand("%:p:h") 
+
+    let i = 0
+    while i <= 10
+        " echo "Looking for solution file at " . current_dir
+
+        let solutions = globpath(current_dir, "*.sln", 0, 1)
+
+        if len(solutions) > 0
+            return solutions[0]
+        endif
+
+        let i = i + 1
+        let current_dir = current_dir . '\..'
+    endwhile
+
+    echom "Solution not found, looking for csproj..."
+
+    let i = 0
+    while i <= 10
+        " echo "Looking for project file at " . current_dir
+
+        let solutions = globpath(current_dir, "*.csproj", 0, 1)
+
+        if len(solutions) > 0
+            return solutions[0]
+        endif
+
+        let i = i + 1
+        let current_dir = current_dir . '\..'
+    endwhile
+
+    echom "Neither solution nor project found!"
+
+    return ""
 endfunction
 
