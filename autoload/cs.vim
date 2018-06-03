@@ -55,6 +55,10 @@ function! cs#get_net_compiler(compiler)
     endif
 endfunction
 
+function! LinuxToWindowsPath(linux_path)
+        return a:linux_path
+endfunction
+
 function! cs#find_net_solution_file()
     let current_dir = expand("%:p:h") 
 
@@ -65,14 +69,14 @@ function! cs#find_net_solution_file()
         let solutions = globpath(current_dir, "*.sln", 0, 1)
 
         if len(solutions) > 0
-            return solutions[0]
+            return LinuxToWindowsPath(solutions[0])
         endif
 
         let i = i + 1
-        let current_dir = current_dir . '\..'
+        let current_dir = current_dir . '//..'
     endwhile
 
-    echom "Solution not found, looking for csproj..."
+    " echom "Solution not found, looking for csproj..."
 
     let i = 0
     while i <= 10
@@ -81,14 +85,14 @@ function! cs#find_net_solution_file()
         let solutions = globpath(current_dir, "*.csproj", 0, 1)
 
         if len(solutions) > 0
-            return solutions[0]
+            return LinuxToWindowsPath(solutions[0])
         endif
 
         let i = i + 1
-        let current_dir = current_dir . '\..'
+        let current_dir = current_dir . '//..'
     endwhile
 
-    echom "Neither solution nor project found!"
+    " echom "Neither solution nor project found!"
 
     return ""
 endfunction
