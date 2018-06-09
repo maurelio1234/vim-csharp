@@ -55,44 +55,55 @@ function! cs#get_net_compiler(compiler)
     endif
 endfunction
 
-function! LinuxToWindowsPath(linux_path)
-        return a:linux_path
+function! cs#find_file(basepath, filepattern)
+    let current_dir = a:basepath
+    let i = 0
+    while i <= 10
+        " echo "Looking for file on pattern " . a:filepattern . " file at " . current_dir
+
+        let solutions = globpath(current_dir, a:filepattern, 0, 1)
+
+        if len(solutions) > 0
+            " echo "Found " . solutions[0]
+            return solutions[0]
+        endif
+
+        let i = i + 1
+        let current_dir = current_dir . '//..'
+    endwhile
+
+    " echo "Not found"
+    return ""
 endfunction
 
 function! cs#find_net_solution_file()
     let current_dir = expand("%:p:h") 
 
-    let i = 0
-    while i <= 10
-        " echo "Looking for solution file at " . current_dir
+    if !exists("g:net_find_csproj")
+        let g:net_find_csproj = 0
+    endif
 
-        let solutions = globpath(current_dir, "*.sln", 0, 1)
-
-        if len(solutions) > 0
-            return LinuxToWindowsPath(solutions[0])
+    if g:net_find_csproj
+        let csproj = cs#find_file(current_dir, "*.csproj")
+        if strlen(csproj) > 0
+            return csproj
         endif
 
-        let i = i + 1
-        let current_dir = current_dir . '//..'
-    endwhile
-
-    " echom "Solution not found, looking for csproj..."
-
-    let i = 0
-    while i <= 10
-        " echo "Looking for project file at " . current_dir
-
-        let solutions = globpath(current_dir, "*.csproj", 0, 1)
-
-        if len(solutions) > 0
-            return LinuxToWindowsPath(solutions[0])
+        let sln = cs#find_file(current_dir, "*.sln")
+        if strlen(sln) > 0
+            return sln
+        endif
+    else
+        let sln = cs#find_file(current_dir, "*.sln")
+        if strlen(sln) > 0
+            return sln
         endif
 
-        let i = i + 1
-        let current_dir = current_dir . '//..'
-    endwhile
-
-    " echom "Neither solution nor project found!"
+        let csproj = cs#find_file(current_dir, "*.csproj")
+        if strlen(csproj) > 0
+            return csproj
+        endif
+    endif
 
     return ""
 endfunction
